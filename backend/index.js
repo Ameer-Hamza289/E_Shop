@@ -6,6 +6,7 @@ require('dotenv').config()
 const cookieParser=require("cookie-parser")
 // const bodyParser=require("body-parser")
 const cors=require("cors")
+const cloudinary = require("cloudinary");
 
 
 app.use(express.json());
@@ -16,9 +17,16 @@ app.use("/",express.static("uploads"))
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+  })
+
+
 //import routes
 const user=require('./controller/userController')
-app.use('/api/v2',user)
+// app.use('/api/user',user)
 
 
 
