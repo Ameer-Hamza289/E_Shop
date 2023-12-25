@@ -6,7 +6,7 @@ require('dotenv').config()
 const cookieParser=require("cookie-parser")
 // const bodyParser=require("body-parser")
 const cors=require("cors")
-const cloudinary = require("cloudinary");
+const cloudinary = require("cloudinary").v2;
 
 
 app.use(express.json());
@@ -20,7 +20,8 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure:true
   })
 
 
