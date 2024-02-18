@@ -15,5 +15,5 @@ app.get("/", (req, res) => {
   });
 
   server.listen(process.env.PORT || 4000, () => {
-    console.log(`server is running on port http://localhost:${process.env.PORT || 4000}`);
+    console.log(` Socket server is running on port http://localhost:${process.env.PORT || 4000}`);
   });
