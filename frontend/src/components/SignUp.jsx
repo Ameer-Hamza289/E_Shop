@@ -134,7 +134,7 @@ import { toast } from 'react-toast';
             </div>
             <div className={`${styles.noramlFlex} w-full`}>
               <h4>Already have an account?</h4>
-              <Link to="/sign-up" className="text-blue-600 pl-2">
+              <Link to="/login" className="text-blue-600 pl-2">
                 Login
               </Link>
             </div>

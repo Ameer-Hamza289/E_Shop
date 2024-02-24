@@ -30,7 +30,8 @@ import {toast} from 'react-toast'
         window.location.reload(true); 
     })
     .catch((err)=>{
-      toast.error(err.response.data.message)
+      console.error(err)
+      toast.error(err?.response?.data?.message || err?.message || err?.error)
     })
 
   }
