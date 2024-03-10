@@ -27,7 +27,26 @@ cloudinary.config({
 
 //import routes
 const user=require('./controller/userController')
-app.use('/api/user',user)
+const product=require("./controller/productController")
+const order=require("./controller/orderController");
+const shop=require("./controller/shopController");
+const conversation=require("./controller/conversationController");
+const couponCode=require("./controller/coupounCodeController");
+const payment=require("./controller/paymentController");
+const event=require("./controller/eventController");
+const withdraw=require("./controller/withdrawController");
+const message=require("./controller/messageController");
+app.use('/api/user',user);
+app.use("/api/products",product);
+app.use("/api/order",order);
+app.use("/api/shop",shop);
+app.use("/api/conversation",conversation);
+app.use("/api/coupon-code",couponCode);
+app.use("/api/message",message);
+app.use("/api/payment",payment);
+app.use("/api/event",event);
+app.use("/api/withdraw",withdraw);
+
 
 
 

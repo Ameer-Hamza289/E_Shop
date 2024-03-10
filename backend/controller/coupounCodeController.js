@@ -4,7 +4,7 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const Shop = require("../model/shop");
 const ErrorHandler = require("../utils/ErrorHandler");
 const { isSeller } = require("../middleware/auth");
-const CoupounCode = require("../model/coupounCode");
+const CoupounCode = require("../model/couponCode");
 const router = express.Router();
 
 router.post("/create-coupon-code",isSeller,catchAsyncErrors(async(req,res,next)=>{

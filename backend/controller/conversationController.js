@@ -1,6 +1,5 @@
 const express=require("express")
 const router=express.Router();
-const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ErrorHandler = require("../utils/ErrorHandler");
 const Conversation = require("../model/conversation");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
