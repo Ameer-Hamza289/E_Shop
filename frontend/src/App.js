@@ -1,7 +1,7 @@
 import './App.css';
 import{BrowserRouter, Routes, Route} from 'react-router-dom'
 
-import HomePage from './pages/Home';
+import HomePage from './pages/HomePage';
 import { ToastContainer } from 'react-toast';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -31,7 +31,7 @@ import {
   ShopLoginPage,
   OrderDetailsPage,
   TrackOrderPage,
-  UserInbox,
+  UserInboxPage,
 } from "./routes/Routes.js";
 import {
   ShopDashboardPage,
@@ -47,6 +47,7 @@ import {
   ShopSettingsPage,
   ShopWithDrawMoneyPage,
   ShopInboxPage,
+  ShopHomePage
 } from "./routes/ShopRoutes";
 import {
   AdminDashboardPage,
@@ -59,7 +60,6 @@ import {
 } from "./routes/AdminRoutes";
 import ProtectedAdminRoute from './routes/ProtectedAdminRoute.js';
 import SellerProtectedRoute from './routes/SellerProtectedRoute.js';
-import { ShopHomePage } from "./ShopRoutes.js";
 
 function App() {
   const [stripeApikey, setStripeApiKey] = useState("");
@@ -129,7 +129,7 @@ function App() {
           path="/inbox"
           element={
             <ProtectedRoute>
-              <UserInbox />
+              <UserInboxPage />
             </ProtectedRoute>
           }
         />
