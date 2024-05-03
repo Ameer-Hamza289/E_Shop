@@ -35,10 +35,10 @@ import { toast } from 'react-toast';
     const config={ headers:{"Content-Type":"multipart/form-data"}}
 
     const newForm=new FormData();
-    newForm.append("file",avatar)
     newForm.append("name",name)
     newForm.append("email",email)
     newForm.append("password",password)
+    newForm.append("avatar",avatar)
 
     axios.post(`${server}/user/create-user`,newForm, config)
     .then((res)=>{
