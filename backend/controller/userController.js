@@ -20,20 +20,23 @@ const createActivationToken=(user)=>{
     })
 }
 
-router.post("/create-user", async (req, res, next) => {
+router.post("/create-user", catchAsyncErrors(async (req, res, next) => {
     try {
-      const { name, email, password, avatar } = req.body;
+      const { name, email, password } = req.body;
+      console.log(req.files.file.data,"req");
       const userEmail = await User.findOne({ email });
   
       if (userEmail) {
         return next(new ErrorHandler("User already exists", 400));
       }
   
-      const myCloud = await cloudinary.v2.uploader.upload(avatar, {
+      const myCloud = await cloudinary.v2.uploader.upload(req.files.file.data, {
         folder: "avatars",
       });
+
+    console.log(myCloud,"cloud");
   
-      const user = {
+      const user =new User({
         name: name,
         email: email,
         password: password,
@@ -41,8 +44,8 @@ router.post("/create-user", async (req, res, next) => {
           public_id: myCloud.public_id,
           url: myCloud.secure_url,
         },
-      };
-  
+      });
+  await user.save();
       const activationToken = createActivationToken(user);
   
       const activationUrl = `http://localhost:3000/activation/${activationToken}`;
@@ -63,7 +66,7 @@ router.post("/create-user", async (req, res, next) => {
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
-  });
+  }));
 
 router.post("/register", upload.single("file"),async(req,res,next)=>{
     try{
