@@ -4,17 +4,19 @@ const ErrorHandler = require('./middleware/error')
 const app=express()
 require('dotenv').config()
 const cookieParser=require("cookie-parser")
-// const bodyParser=require("body-parser")
+const bodyParser=require("body-parser")
 const cors=require("cors")
 const cloudinary = require("cloudinary").v2;
+const fileupload = require("express-fileupload");
 
 
 app.use(express.json());
 app.use(cookieParser())
 app.use(cors({origin:"http://localhost:3000",credentials:true}));
-app.use("/",express.static("uploads"))
-// app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
-app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+// app.use("/",express.static("uploads"))
+app.use(bodyParser.json());
+app.use(fileupload());
+// app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 
 cloudinary.config({
