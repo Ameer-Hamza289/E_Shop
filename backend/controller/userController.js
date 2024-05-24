@@ -10,7 +10,7 @@ const sendMail = require("../utils/sendMail");
 const sendToken = require("../utils/jwtToken");
 const { isAuthenticated, isAdmin } = require("../middleware/auth");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
-const cloudinary = require("cloudinary");
+// const cloudinary = require("cloudinary");
 
 
 
@@ -20,32 +20,48 @@ const createActivationToken=(user)=>{
     })
 }
 
-router.post("/create-user", catchAsyncErrors(async (req, res, next) => {
+router.post("/create-user",upload.single("file") , async (req, res, next) => {
     try {
       const { name, email, password } = req.body;
-      console.log(req.files.file.data,"req");
+      // console.log(req);
+      console.log(req.files.file.data,"pre data");
+      // console.log(req.body,"req");
       const userEmail = await User.findOne({ email });
   
       if (userEmail) {
-        return next(new ErrorHandler("User already exists", 400));
+        const filename = req.file.filename;
+        const filePath = `uploads/${filename}`;
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Error deleting file" });
+          }
+        });
+        return next(new ErrorHandler("User already exist", 400));
       }
-  
-      const myCloud = await cloudinary.v2.uploader.upload(req.files.file.data, {
-        folder: "avatars",
-      });
+      // var buffer=newBUffer(req.files.file.data);
+      var file=req.files.file.data
+      // console.log(file,"file");
+      // const myCloud = await cloudinary.v2.uploader.upload(file, {
+      //   folder: "avatars",
+      // });
+      const filename = req.file.filename;
+      const fileUrl = path.join(filename);
 
     console.log(myCloud,"cloud");
   
-      const user =new User({
+      const user ={
         name: name,
         email: email,
         password: password,
-        avatar: {
-          public_id: myCloud.public_id,
-          url: myCloud.secure_url,
-        },
-      });
-  await user.save();
+        avatar:fileUrl
+        // avatar: {
+        //   public_id: myCloud.public_id,
+        //   url: myCloud.secure_url,
+        // },
+        
+      };
+  // await user.save();
       const activationToken = createActivationToken(user);
   
       const activationUrl = `http://localhost:3000/activation/${activationToken}`;
@@ -64,9 +80,10 @@ router.post("/create-user", catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
       }
     } catch (error) {
+      // console.log(error);
       return next(new ErrorHandler(error.message, 400));
     }
-  }));
+  });
 
 router.post("/register", upload.single("file"),async(req,res,next)=>{
     try{
@@ -272,21 +289,28 @@ router.put("/update-avatar",isAuthenticated,catchAsyncErrors(async(req,res,next)
         let existsUser = await User.findById(req.user.id);
         if(req.body.avatar!== ""){
             const imageId=existsUser.avatar.public_id;
-            await cloudinary.v2.uploader.destroy(imageId);
-            const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-                folder: "avatars",
-                width: 150,
-              });
+            // await cloudinary.v2.uploader.destroy(imageId);
+            // const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+            //     folder: "avatars",
+            //     width: 150,
+            //   });
 
-              existsUser.avatar = {
-                public_id: myCloud.public_id,
-                url: myCloud.secure_url,
-              };
+            //   existsUser.avatar = {
+            //     public_id: myCloud.public_id,
+            //     url: myCloud.secure_url,
+            //   };
+            const existsAvatarPath = `uploads/${existsUser.avatar}`;
+            fs.unlinkSync(existsAvatarPath);
+            const fileUrl = path.join(req.file.filename);
+      
+            const user = await User.findByIdAndUpdate(req.user.id, {
+              avatar: fileUrl,
+            });
             }
-        await existsUser.save();
+        // await existsUser.save();
         res.status(200).json({
             success: true,
-            user: existsUser,
+            user: user,
           });
         }
      catch (error) {
@@ -413,14 +437,11 @@ router.get("/admin-all-users",isAuthenticated,isAdmin("Admin"),catchAsyncErrors(
 router.delete( "/delete-user/:id", isAuthenticated, isAdmin("Admin"), catchAsyncErrors(async (req, res, next) => {
       try {
         const user = await User.findById(req.params.id);
-  
+
         if (!user) {
-          return next(
-            new ErrorHandler("User is not available with this id", 400)
-          );
+          return next(new ErrorHandler("User not found!", 400));
         }
-        const imageId = user.avatar.public_id;
-        await cloudinary.v2.uploader.destroy(imageId);
+  
         await User.findByIdAndDelete(req.params.id);
   
         res.status(201).json({
