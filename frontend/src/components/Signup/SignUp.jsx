@@ -14,19 +14,25 @@ import { toast } from 'react-toast';
   const [name,setName]=useState('');
   const [visible,setVisible]=useState()
   const [avatar,setAvatar]=useState(null)
+  const [avatarURL,setAvatarURL]=useState(null)
 
   
 
   const handleFileInputChange = (e) =>{
-    const reader = new FileReader()
+    // const reader = new FileReader()
 
-    reader.onload=()=>{
-      if(reader.readyState===2){
-        setAvatar(reader.result)
-      }
+    // reader.onload=()=>{
+    //   if(reader.readyState===2){
+    //     setAvatar(reader.result)
+    //   }
+    // }
+
+    // reader.readAsDataURL(e.target.files[0])
+    const file = e.target.files[0];
+    if (file) {
+      setAvatar(file);
+      setAvatarURL(URL.createObjectURL(file));
     }
-
-    reader.readAsDataURL(e.target.files[0])
   }
 
   const handleSubmit = async(e)=>{
@@ -38,7 +44,7 @@ import { toast } from 'react-toast';
     newForm.append("name",name)
     newForm.append("email",email)
     newForm.append("password",password)
-    newForm.append("avatar",avatar)
+    newForm.append("file",avatar)
 
     axios.post(`${server}/user/create-user`,newForm, config)
     .then((res)=>{
@@ -98,7 +104,7 @@ import { toast } from 'react-toast';
                 <span className="inline-block h-8 w-8 rounded-full overflow-hidden">
                   {avatar ? (
                     <img
-                      src={avatar}
+                      src={avatarURL}
                       alt="avatar"
                       className="h-full w-full object-cover rounded-full"
                     />
