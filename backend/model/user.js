@@ -47,14 +47,16 @@ email:{
     default: "user",
   },
   avatar:{
-    public_id: {
-      type: String,
-      required: true,
-    },
-    url: {
-      type: String,
-      required: true,
-    },
+    // public_id: {
+    //   type: String,
+    //   required: true,
+    // },
+    // url: {
+    //   type: String,
+    //   required: true,
+    // },
+    type: String,
+    required: [true, "Please enter your image"],
  },
  createdAt:{
   type: Date,

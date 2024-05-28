@@ -24,7 +24,6 @@ router.post("/create-user",upload.single("file") , async (req, res, next) => {
     try {
       const { name, email, password } = req.body;
       // console.log(req);
-      console.log(req.files.file.data,"pre data");
       // console.log(req.body,"req");
       const userEmail = await User.findOne({ email });
   
@@ -40,7 +39,7 @@ router.post("/create-user",upload.single("file") , async (req, res, next) => {
         return next(new ErrorHandler("User already exist", 400));
       }
       // var buffer=newBUffer(req.files.file.data);
-      var file=req.files.file.data
+      // var file=req.files.file.data
       // console.log(file,"file");
       // const myCloud = await cloudinary.v2.uploader.upload(file, {
       //   folder: "avatars",
@@ -48,7 +47,7 @@ router.post("/create-user",upload.single("file") , async (req, res, next) => {
       const filename = req.file.filename;
       const fileUrl = path.join(filename);
 
-    console.log(myCloud,"cloud");
+    // console.log(myCloud,"cloud");
   
       const user ={
         name: name,
@@ -136,11 +135,13 @@ router.post("/register", upload.single("file"),async(req,res,next)=>{
 
 });
 
-router.post('/activation',catchAsyncErrors(async(req,re,next)=>{
+router.post('/activation',catchAsyncErrors(async(req,res,next)=>{
     try {
-        const {activationToken}=req.body
+        const {activation_token}=req.body
+        // console.log(activation_token,"token");
+        // console.log(req);
         const newUser=jwt.verify(
-        activationToken,
+          activation_token,
         process.env.ACTIVATION_SECRET
         )
         if(!newUser){
