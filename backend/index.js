@@ -7,16 +7,18 @@ const cookieParser=require("cookie-parser")
 const bodyParser=require("body-parser")
 const cors=require("cors")
 const cloudinary = require("cloudinary").v2;
-const fileupload = require("express-fileupload");
+// const fileupload = require("express-fileupload");
+const path = require("path");
 
 
 app.use(express.json());
-app.use(cookieParser())
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+app.use(cookieParser());
 app.use(cors({origin:"http://localhost:3000",credentials:true}));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // app.use("/",express.static("uploads"))
-app.use(bodyParser.json());
-app.use(fileupload());
-// app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+// app.use(bodyParser.json());
+// app.use(fileupload());
 
 
 cloudinary.config({
