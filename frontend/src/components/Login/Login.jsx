@@ -5,9 +5,12 @@ import {Link, useNavigate} from 'react-router-dom'
 import axios from 'axios'
 import {server} from '../../server'
 import {toast} from 'react-toast'
+import {loadUser} from "../../redux/actions/user";
+import { useDispatch } from 'react-redux'
 
  const Login = () => {
-  const navigate=useNavigate()
+  const navigate=useNavigate();
+  const dispatch=useDispatch();
   
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
@@ -26,6 +29,7 @@ import {toast} from 'react-toast'
     .then((res)=>{
       toast.success("Login Success!");
       console.log(res);
+      dispatch(loadUser());
         navigate("/");
         window.location.reload(true); 
     })
