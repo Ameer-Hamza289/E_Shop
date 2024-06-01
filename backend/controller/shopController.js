@@ -11,26 +11,38 @@ const ErrorHandler = require("../utils/ErrorHandler");
 const sendShopToken = require("../utils/shopToken");
 
 
-router.post("/create-shop",catchAsyncErrors(async(req,res,next)=>{
+router.post("/create-shop",upload.single("file"),catchAsyncErrors(async(req,res,next)=>{
     try {
         const { email } = req.body;
         const sellerEmail = await Shop.findOne({ email });
         if (sellerEmail) {
-          return next(new ErrorHandler("User already exists", 400));
+          const filename = req.file.filename;
+          const filePath = `uploads/${filename}`;
+          fs.unlink(filePath, (err) => {
+            if (err) {
+              console.log(err);
+              res.status(500).json({ message: "Error deleting file" });
+            }
+          });
+          return next(new ErrorHandler("Seller already exist", 400));
         }
     
-        const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-          folder: "avatars",
-        });
+        const filename = req.file.filename;
+        const fileUrl = path.join(filename);
+    
+        // const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+        //   folder: "avatars",
+        // });
 
         const seller = {
             name: req.body.name,
             email: email,
             password: req.body.password,
-            avatar: {
-              public_id: myCloud.public_id,
-              url: myCloud.secure_url,
-            },
+            // avatar: {
+            //   public_id: myCloud.public_id,
+            //   url: myCloud.secure_url,
+            // },
+            avatar:fileUrl,
             address: req.body.address,
             phoneNumber: req.body.phoneNumber,
             zipCode: req.body.zipCode,
