@@ -27,26 +27,33 @@ const CreateProduct = () => {
     }
     if (success) {
       toast.success("Product created successfully!");
-      navigate("/dashboard");
+      navigate("/dashboard-products");
       window.location.reload();
     }
-  }, [dispatch, error, success]);
+  }, [error, success, navigate, dispatch]);
+
+  // const handleImageChange = (e) => {
+  //   const files = Array.from(e.target.files);
+
+  //   setImages([]);
+
+  //   files.forEach((file) => {
+  //     const reader = new FileReader();
+
+  //     reader.onload = () => {
+  //       if (reader.readyState === 2) {
+  //         setImages((old) => [...old, reader.result]);
+  //       }
+  //     };
+  //     reader.readAsDataURL(file);
+  //   });
+  // };
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
+    e.preventDefault();
 
-    setImages([]);
-
-    files.forEach((file) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        if (reader.readyState === 2) {
-          setImages((old) => [...old, reader.result]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    let files = Array.from(e.target.files);
+    setImages((prevImages) => [...prevImages, ...files]);
   };
 
   const handleSubmit = (e) => {
@@ -55,7 +62,7 @@ const CreateProduct = () => {
     const newForm = new FormData();
 
     images.forEach((image) => {
-      newForm.set("images", image);
+      newForm.append("images", image);
     });
     newForm.append("name", name);
     newForm.append("description", description);
@@ -66,17 +73,7 @@ const CreateProduct = () => {
     newForm.append("stock", stock);
     newForm.append("shopId", seller._id);
     dispatch(
-      createProduct({
-        name,
-        description,
-        category,
-        tags,
-        originalPrice,
-        discountPrice,
-        stock,
-        shopId: seller._id,
-        images,
-      })
+      createProduct(newForm)
     );
   };
 
@@ -207,7 +204,7 @@ const CreateProduct = () => {
             {images &&
               images.map((i) => (
                 <img
-                  src={i}
+                  src={URL.createObjectURL(i)}
                   key={i}
                   alt=""
                   className="h-[120px] w-[120px] object-cover m-2"

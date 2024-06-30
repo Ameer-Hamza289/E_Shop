@@ -20,7 +20,7 @@ const AllProducts = () => {
 
   const handleDelete = (id) => {
     dispatch(deleteProduct(id));
-    window.location.reload();
+    window.location.reload(); 
   };
 
   const columns = [

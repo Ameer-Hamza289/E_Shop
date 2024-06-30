@@ -21,7 +21,7 @@ export const createProduct =
       });
 
       const { data } = await axios.post(
-        `${server}/product/create-product`,
+        `${server}/products/create-product`,
         name,
         description,
         category,
@@ -52,7 +52,7 @@ export const getAllProductsShop = (id) => async (dispatch) => {
     });
 
     const { data } = await axios.get(
-      `${server}/product/get-all-products-shop/${id}`
+      `${server}/products/get-all-products-shop/${id}`
     );
     dispatch({
       type: "getAllProductsShopSuccess",
@@ -74,7 +74,7 @@ export const deleteProduct = (id) => async (dispatch) => {
     });
 
     const { data } = await axios.delete(
-      `${server}/product/delete-shop-product/${id}`,
+      `${server}/products/delete-shop-product/${id}`,
       {
         withCredentials: true,
       }
