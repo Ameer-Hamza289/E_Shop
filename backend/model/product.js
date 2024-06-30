@@ -29,7 +29,7 @@ const productSchema = new mongoose.Schema({
   },
   images: [
     {
-      tye: String,
+      type: String,
       required: [true, "Please enter your product images"],
     },
   ],

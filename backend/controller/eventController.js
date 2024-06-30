@@ -5,7 +5,7 @@ const Event = require("../model/event");
 const ErrorHandler = require("../utils/ErrorHandler");
 const { isSeller, isAdmin, isAuthenticated } = require("../middleware/auth");
 const router = express.Router();
-const upload = require("../multer");
+const {upload} = require("../multer");
 
 router.post(
   "/create-event",
