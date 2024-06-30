@@ -7,6 +7,7 @@ const Order = require("../model/order");
 const Shop = require("../model/shop");
 const ErrorHandler = require("../utils/ErrorHandler");
 const { upload } = require("../multer");
+const fs=require("fs");
 
 router.post(
   "/create-product",
@@ -32,6 +33,7 @@ router.post(
         });
       }
     } catch (error) {
+      console.log(error);
       return next(new ErrorHandler(error.message, 500));
     }
   })

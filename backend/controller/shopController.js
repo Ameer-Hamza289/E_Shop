@@ -12,8 +12,7 @@ const { upload } = require("../multer");
 
 router.post(
   "/create-shop",
-  upload.single("file"),
-  catchAsyncErrors(async (req, res, next) => {
+  upload.single("avatar"),async (req, res, next) => {
     try {
       const { email } = req.body;
       const sellerEmail = await Shop.findOne({ email });
@@ -22,7 +21,6 @@ router.post(
         const filePath = `uploads/${filename}`;
         fs.unlink(filePath, (err) => {
           if (err) {
-            console.log(err);
             res.status(500).json({ message: "Error deleting file" });
           }
         });
@@ -48,6 +46,7 @@ router.post(
         address: req.body.address,
         phoneNumber: req.body.phoneNumber,
         zipCode: req.body.zipCode,
+        description:req.body.description
       };
 
       const activationToken = createActivationToken(seller);
@@ -68,7 +67,7 @@ router.post(
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
-  })
+  }
 );
 
 const createActivationToken = (seller) => {
