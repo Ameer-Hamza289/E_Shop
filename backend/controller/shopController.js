@@ -5,78 +5,83 @@ const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
 const Shop = require("../model/shop");
 const { isAuthenticated, isSeller, isAdmin } = require("../middleware/auth");
-const cloudinary = require("cloudinary");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ErrorHandler = require("../utils/ErrorHandler");
 const sendShopToken = require("../utils/shopToken");
+const { upload } = require("../multer");
 
-
-router.post("/create-shop",upload.single("file"),catchAsyncErrors(async(req,res,next)=>{
+router.post(
+  "/create-shop",
+  upload.single("file"),
+  catchAsyncErrors(async (req, res, next) => {
     try {
-        const { email } = req.body;
-        const sellerEmail = await Shop.findOne({ email });
-        if (sellerEmail) {
-          const filename = req.file.filename;
-          const filePath = `uploads/${filename}`;
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              console.log(err);
-              res.status(500).json({ message: "Error deleting file" });
-            }
-          });
-          return next(new ErrorHandler("Seller already exist", 400));
-        }
-    
+      const { email } = req.body;
+      const sellerEmail = await Shop.findOne({ email });
+      if (sellerEmail) {
         const filename = req.file.filename;
-        const fileUrl = path.join(filename);
-    
-        // const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-        //   folder: "avatars",
-        // });
+        const filePath = `uploads/${filename}`;
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Error deleting file" });
+          }
+        });
+        return next(new ErrorHandler("Seller already exist", 400));
+      }
 
-        const seller = {
-            name: req.body.name,
-            email: email,
-            password: req.body.password,
-            // avatar: {
-            //   public_id: myCloud.public_id,
-            //   url: myCloud.secure_url,
-            // },
-            avatar:fileUrl,
-            address: req.body.address,
-            phoneNumber: req.body.phoneNumber,
-            zipCode: req.body.zipCode,
-          };
-      
-          const activationToken = createActivationToken(seller);
-          const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
-          try {
-            await sendMail({
-              email: seller.email,
-              subject: "Activate your Shop",
-              message: `Hello ${seller.name}, please click on the link to activate your shop: ${activationUrl}`,
-            });
-            res.status(201).json({
-              success: true,
-              message: `please check your email:- ${seller.email} to activate your shop!`,
-            });
-          } catch (error) {
-            return next(new ErrorHandler(error.message, 500));
-          }     
+      const filename = req.file.filename;
+      const fileUrl = path.join(filename);
+
+      // const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      //   folder: "avatars",
+      // });
+
+      const seller = {
+        name: req.body.name,
+        email: email,
+        password: req.body.password,
+        // avatar: {
+        //   public_id: myCloud.public_id,
+        //   url: myCloud.secure_url,
+        // },
+        avatar: fileUrl,
+        address: req.body.address,
+        phoneNumber: req.body.phoneNumber,
+        zipCode: req.body.zipCode,
+      };
+
+      const activationToken = createActivationToken(seller);
+      const activationUrl = `http://localhost:3000/seller/activation/${activationToken}`;
+      try {
+        await sendMail({
+          email: seller.email,
+          subject: "Activate your Shop",
+          message: `Hello ${seller.name}, please click on the link to activate your shop: ${activationUrl}`,
+        });
+        res.status(201).json({
+          success: true,
+          message: `please check your email:- ${seller.email} to activate your shop!`,
+        });
+      } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+      }
     } catch (error) {
-        return next(new ErrorHandler(error.message, 400));
+      return next(new ErrorHandler(error.message, 400));
     }
-}));
+  })
+);
 
 const createActivationToken = (seller) => {
-    return jwt.sign(seller, process.env.ACTIVATION_SECRET, {
-      expiresIn: "5m",
-    });
-  };
+  return jwt.sign(seller, process.env.ACTIVATION_SECRET, {
+    expiresIn: "5m",
+  });
+};
 
-router.post("/activation",catchAsyncErrors(async(req,res,next)=>{
-        try {
-            const { activation_token } = req.body;
+router.post(
+  "/activation",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { activation_token } = req.body;
 
       const newSeller = jwt.verify(
         activation_token,
@@ -112,7 +117,9 @@ router.post("/activation",catchAsyncErrors(async(req,res,next)=>{
   })
 );
 
-router.post("/login-shop",catchAsyncErrors(async (req, res, next) => {
+router.post(
+  "/login-shop",
+  catchAsyncErrors(async (req, res, next) => {
     try {
       const { email, password } = req.body;
 
@@ -135,132 +142,150 @@ router.post("/login-shop",catchAsyncErrors(async (req, res, next) => {
       }
 
       sendShopToken(user, 201, res);
-        
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      return next(new ErrorHandler(error.message, 500));
     }
+  })
+);
 
-}));
-
-router.get("/getSeller",isSeller,catchAsyncErrors(async(req,res,next)=>{
+router.get(
+  "/getSeller",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
     try {
-        const seller = await Shop.findById(req.seller._id);
+      const seller = await Shop.findById(req.seller._id);
 
-        if (!seller) {
-          return next(new ErrorHandler("User doesn't exists", 400));
-        }
-  
-        res.status(200).json({
-          success: true,
-          seller,
-        });
-
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-}));
-
-router.get("/logout",catchAsyncErrors(async(req,res,next)=>{
-    try {
-        res.cookie("seller_token", null, {
-            expires: new Date(Date.now()),
-            httpOnly: true,
-            sameSite: "none",
-            secure: true,
-          });
-          res.status(201).json({
-            success: true,
-            message: "Log out successful!",
-          });
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-}));
-
-router.get("/get-shop-info/:id",catchAsyncErrors(async(req,res,next)=>{
-    try {
-        const shop = await Shop.findById(req.params.id);
-        res.status(201).json({
-          success: true,
-          shop,
-        });
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-}));
-
-router.put("/update-shop-avatar",isSeller,catchAsyncErrors(async(req,res,next)=>{
-    try {
-        let existsSeller = await Shop.findById(req.seller._id);
-
-        const imageId = existsSeller.avatar.public_id;
-        await cloudinary.v2.uploader.destroy(imageId);
-
-        const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-          folder: "avatars",
-          width: 150,
-        });
-
-        existsSeller.avatar = {
-          public_id: myCloud.public_id,
-          url: myCloud.secure_url,
-        };
-
-      await existsSeller.save();
+      if (!seller) {
+        return next(new ErrorHandler("User doesn't exists", 400));
+      }
 
       res.status(200).json({
         success: true,
-        seller:existsSeller,
+        seller,
       });
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      return next(new ErrorHandler(error.message, 500));
     }
-}));
+  })
+);
 
-router.put("/update-seller-info",isSeller, catchAsyncErrors(async(req,res,next)=>{
+router.get(
+  "/logout",
+  catchAsyncErrors(async (req, res, next) => {
     try {
-        const { name, description, address, phoneNumber, zipCode } = req.body;
-
-        const shop = await Shop.findOne(req.seller._id);
-  
-        if (!shop) {
-          return next(new ErrorHandler("User not found", 400));
-        }
-  
-        shop.name = name;
-        shop.description = description;
-        shop.address = address;
-        shop.phoneNumber = phoneNumber;
-        shop.zipCode = zipCode;
-  
-        await shop.save();
-  
-        res.status(201).json({
-          success: true,
-          shop,
-        });
+      res.cookie("seller_token", null, {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+      });
+      res.status(201).json({
+        success: true,
+        message: "Log out successful!",
+      });
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      return next(new ErrorHandler(error.message, 500));
     }
-}));
+  })
+);
 
-router.get("/admin-all-sellers",isAuthenticated,isAdmin("Admin"),catchAsyncErrors(async(req,res,next)=>{
+router.get(
+  "/get-shop-info/:id",
+  catchAsyncErrors(async (req, res, next) => {
     try {
-        const sellers = await Shop.find().sort({
-            createdAt: -1,
-          });
-          res.status(201).json({
-            success: true,
-            sellers,
-          });
+      const shop = await Shop.findById(req.params.id);
+      res.status(201).json({
+        success: true,
+        shop,
+      });
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      return next(new ErrorHandler(error.message, 500));
     }
-}));
+  })
+);
 
-router.delete("/delete-seller/:id",isAuthenticated,isAdmin("Admin"),catchAsyncErrors(async(req,res,next)=>{
+router.put(
+  "/update-shop-avatar",
+  isSeller,
+  upload.single("image"),
+  catchAsyncErrors(async (req, res, next) => {
     try {
-        const seller = await Shop.findById(req.params.id);
+      let existsShop = await Shop.findById(req.seller._id);
+      const existsAvatarPath = `uploads/${existsShop.avatar}`;
+      fs.unlinkSync(existsAvatarPath);
+      const fileUrl = path.join(req.file.filename);
+
+      const seller = await Shop.findByIdAndUpdate(req.seller._id, {
+        avatar: fileUrl,
+      });
+
+      res.status(200).json({
+        success: true,
+        seller,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+router.put(
+  "/update-seller-info",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { name, description, address, phoneNumber, zipCode } = req.body;
+
+      const shop = await Shop.findOne(req.seller._id);
+
+      if (!shop) {
+        return next(new ErrorHandler("User not found", 400));
+      }
+
+      shop.name = name;
+      shop.description = description;
+      shop.address = address;
+      shop.phoneNumber = phoneNumber;
+      shop.zipCode = zipCode;
+
+      await shop.save();
+
+      res.status(201).json({
+        success: true,
+        shop,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+router.get(
+  "/admin-all-sellers",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const sellers = await Shop.find().sort({
+        createdAt: -1,
+      });
+      res.status(201).json({
+        success: true,
+        sellers,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+router.delete(
+  "/delete-seller/:id",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const seller = await Shop.findById(req.params.id);
 
       if (!seller) {
         return next(
@@ -275,31 +300,38 @@ router.delete("/delete-seller/:id",isAuthenticated,isAdmin("Admin"),catchAsyncEr
         message: "Seller deleted successfully!",
       });
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      return next(new ErrorHandler(error.message, 500));
     }
-}));
+  })
+);
 
-router.put("/update-payment-methods",isSeller,catchAsyncErrors(async(req,res,next)=>{
+router.put(
+  "/update-payment-methods",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
     try {
-        const { withdrawMethod } = req.body;
+      const { withdrawMethod } = req.body;
 
-        const seller = await Shop.findByIdAndUpdate(req.seller._id, {
-          withdrawMethod,
-        });
-  
-        res.status(201).json({
-          success: true,
-          seller,
-        });
+      const seller = await Shop.findByIdAndUpdate(req.seller._id, {
+        withdrawMethod,
+      });
+
+      res.status(201).json({
+        success: true,
+        seller,
+      });
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      return next(new ErrorHandler(error.message, 500));
     }
+  })
+);
 
-}));
-
-router.delete("/delete-withdraw-method",isSeller,catchAsyncErrors(async(req,res,next)=>{
+router.delete(
+  "/delete-withdraw-method",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
     try {
-        const seller = await Shop.findById(req.seller._id);
+      const seller = await Shop.findById(req.seller._id);
 
       if (!seller) {
         return next(new ErrorHandler("Seller not found with this id", 400));
@@ -314,19 +346,18 @@ router.delete("/delete-withdraw-method",isSeller,catchAsyncErrors(async(req,res,
         seller,
       });
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+      return next(new ErrorHandler(error.message, 500));
     }
-}));
-
-
+  })
+);
 
 // router.post("",catchAsyncErrors(async(req,res,next)=>{
 //     try {
-        
+
 //     } catch (error) {
 //         return next(new ErrorHandler(error.message, 500));
 //     }
 
 // }));
 
-module.exports=router
+module.exports = router;
