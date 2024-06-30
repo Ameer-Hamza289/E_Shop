@@ -20,6 +20,9 @@ router.post("/process",catchAsyncErrors(async (req, res, next) => {
 );
 
 router.get("/stripeapikey",catchAsyncErrors(async (req, res, next) => {
+  if(!process.env.STRIPE_API_KEY){
+    return next(new ErrorHandler("No Stripe API Keys found", 404));
+  }
     res.status(200).json({ stripeApikey: process.env.STRIPE_API_KEY });
   })
 );

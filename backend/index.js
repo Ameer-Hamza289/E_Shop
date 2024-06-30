@@ -6,7 +6,7 @@ require('dotenv').config()
 const cookieParser=require("cookie-parser")
 const bodyParser=require("body-parser")
 const cors=require("cors")
-const cloudinary = require("cloudinary").v2;
+// const cloudinary = require("cloudinary").v2;
 // const fileupload = require("express-fileupload");
 const path = require("path");
 
@@ -21,12 +21,12 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // app.use(fileupload());
 
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure:true
-  })
+// cloudinary.config({
+//     cloud_name: process.env.CLOUDINARY_NAME,
+//     api_key: process.env.CLOUDINARY_API_KEY,
+//     api_secret: process.env.CLOUDINARY_API_SECRET,
+//     secure:true
+//   })
 
 
 //import routes
