@@ -2,7 +2,7 @@ import axios from "axios";
 import { server } from "../../server";
 
 // create event
-export const createevent = (data) => async (dispatch) => {
+export const createEvent = (data) => async (dispatch) => {
   try {
     dispatch({
       type: "eventCreateRequest",

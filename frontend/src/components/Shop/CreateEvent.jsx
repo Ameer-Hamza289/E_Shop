@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { categoriesData } from "../../static/data";
 import { toast } from "react-toastify";
-import { createevent } from "../../redux/actions/event";
+import { createEvent } from "../../redux/actions/event";
 
 const CreateEvent = () => {
   const { seller } = useSelector((state) => state.seller);
@@ -28,7 +28,7 @@ const CreateEvent = () => {
     const minEndDate = new Date(startDate.getTime() + 3 * 24 * 60 * 60 * 1000);
     setStartDate(startDate);
     setEndDate(null);
-    document.getElementById("end-date").min = minEndDate.toISOString.slice(
+    document.getElementById("end-date").min = minEndDate.toISOString().slice(
       0,
       10
     );
@@ -58,21 +58,28 @@ const CreateEvent = () => {
     }
   }, [dispatch, error, success]);
 
+  // const handleImageChange = (e) => {
+  //   const files = Array.from(e.target.files);
+
+  //   setImages([]);
+
+  //   files.forEach((file) => {
+  //     const reader = new FileReader();
+
+  //     reader.onload = () => {
+  //       if (reader.readyState === 2) {
+  //         setImages((old) => [...old, reader.result]);
+  //       }
+  //     };
+  //     reader.readAsDataURL(file);
+  //   });
+  // };
+
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
+    e.preventDefault();
 
-    setImages([]);
-
-    files.forEach((file) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        if (reader.readyState === 2) {
-          setImages((old) => [...old, reader.result]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    let files = Array.from(e.target.files);
+    setImages((prevImages) => [...prevImages, ...files]);
   };
 
   const handleSubmit = (e) => {
@@ -83,20 +90,18 @@ const CreateEvent = () => {
     images.forEach((image) => {
       newForm.append("images", image);
     });
-    const data = {
-      name,
-      description,
-      category,
-      tags,
-      originalPrice,
-      discountPrice,
-      stock,
-      images,
-      shopId: seller._id,
-      start_Date: startDate?.toISOString(),
-      Finish_Date: endDate?.toISOString(),
-    };
-    dispatch(createevent(data));
+    newForm.append("name", name);
+    newForm.append("description", description);
+    newForm.append("category", category);
+    newForm.append("tags", tags);
+    newForm.append("originalPrice", originalPrice);
+    newForm.append("discountPrice", discountPrice);
+    newForm.append("stock", stock);
+    newForm.append("shopId", seller._id);
+    newForm.append("start_Date", startDate.toISOString());
+    newForm.append("Finish_Date", endDate.toISOString());
+
+    dispatch(createEvent(newForm));
   };
 
   return (
@@ -230,7 +235,7 @@ const CreateEvent = () => {
           <input
             type="date"
             name="price"
-            id="start-date"
+            id="end-date"
             value={endDate ? endDate.toISOString().slice(0, 10) : ""}
             className="mt-2 appearance-none block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             onChange={handleEndDateChange}
@@ -258,7 +263,7 @@ const CreateEvent = () => {
             {images &&
               images.map((i) => (
                 <img
-                  src={i}
+                  src={URL.createObjectURL(i)}
                   key={i}
                   alt=""
                   className="h-[120px] w-[120px] object-cover m-2"
