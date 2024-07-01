@@ -11,6 +11,7 @@ const sendToken = require("../utils/jwtToken");
 const { isAuthenticated, isAdmin } = require("../middleware/auth");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 // const cloudinary = require("cloudinary");
+const fs=require("fs");
 
 
 
